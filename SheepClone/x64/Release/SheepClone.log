@@ -1,7 +1,7 @@
 ﻿  main.c
-C:\Users\aldap\Pictures\rust_tutorials\SheepClone\main.c(8,12): warning C4133: 'initializing': incompatible types - from 'unsigned short [17]' to 'LPCSTR'
   Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 5 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  5 of 8 functions (62.5%) were compiled, the rest were copied from previous compilation.
+    3 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   SheepClone.vcxproj -> C:\Users\aldap\Pictures\rust_tutorials\SheepClone\x64\Release\SheepClone.exe
