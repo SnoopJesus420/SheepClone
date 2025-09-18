@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <Windows.h>
+#include <TlHelp32.h>
 #include <winternl.h>
 
 // Check if a privilege is already enabled
@@ -126,8 +127,62 @@ BOOL EnablePrivilege()
     return TRUE;
 }
 
-int main()
-{
+// Find Process Function
+DWORD FindProcess(DWORD pid) {
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot == INVALID_HANDLE_VALUE) {
+        printf("\t [!] Failed to create snapshot! Error Code: %u\n", GetLastError());
+        return 0;
+    }
+
+    PROCESSENTRY32 pe32 = { sizeof(pe32) };
+    DWORD foundPid = 0;
+
+    if (Process32First(snapshot, &pe32)) {
+        do {
+            if (pe32.th32ProcessID == pid) {
+                foundPid = pid;
+                break;
+            }
+        } while (Process32Next(snapshot, &pe32));
+    }
+
+    CloseHandle(snapshot);
+    return foundPid;
+}
+
+
+int main(int argc, char *argv[]) {
+    // Variable Initalization
+    DWORD processToClonePid = 0;
+    char* endptr;
+
+    // Check arguments
+    if (argc != 3 || (argc > 0 && argv[0] == "-h")) {
+        printf("Usage: %s <PID> <PATH_TO_DUMP>\n", argv[0]);
+        return 1;
+    }
+
+    // Validate PID Parameter Input
+    processToClonePid = strtol(argv[1], &endptr, 10);
+    if (endptr == argv[1] || *endptr != '\0') {
+        printf("\t [!] Invalid PID format! Please provide a PID number!");
+        return 1;
+    } 
+    if (processToClonePid <= 0) {
+        printf("\t [!] PID must be a positive number!");
+        return 1;
+    }
+
+    // Find Process
+    if (FindProcess(processToClonePid) == 0) {
+        printf("\t [!] Target Process with PID %u Not Found!\n", processToClonePid);
+        return 1;
+    }
+    printf("[+] Process with PID %u found!\n", processToClonePid);
+    printf("\n");
+
+    // Checking token privileges
     wprintf(L"[i] Checking token privileges...\n");
     if (!EnablePrivilege())
     {
@@ -135,5 +190,8 @@ int main()
         return 1;
     }
     wprintf(L"[i] Privilege operation completed\n");
+
+    // GetFucked();
+
     return 0;
 }
