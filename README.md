@@ -3,7 +3,7 @@ A BOF to stealthly dump LSASS <br>
 ![31573262108240405](https://github.com/user-attachments/assets/0504ba2f-f7bc-4341-b11c-ccc91bf41341)
 
 # Info
-This BOF leverages a technique known as "Process Cloning" to stealthly dump LSASS. By using legacy NTAPIs we can create a process that inherits the full virtual memory of another process. 
+This BOF leverages a technique known as "Process Cloning" to stealthly dump LSASS. By leveraging legacy NTAPIs, we can create a process that inherits the full virtual memory of another process. 
 
 # Disclaimer
 For educational purposes only!! 
