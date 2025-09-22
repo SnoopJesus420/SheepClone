@@ -1,7 +1,56 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <TlHelp32.h>
-#include <winternl.h>
+
+// Define STATUS_SUCCESS if not already defined
+#ifndef STATUS_SUCCESS
+#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#endif
+
+// Define NTSTATUS if not already defined
+#ifndef NTSTATUS
+typedef _Return_type_success_(return >= 0) LONG NTSTATUS;
+#endif
+
+// Define NTAPI if not already defined
+#ifndef NTAPI
+#define NTAPI __stdcall
+#endif
+
+// Define UNICODE_STRING structure
+typedef struct _UNICODE_STRING {
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
+
+// Define CLIENT_ID structure
+typedef struct _CLIENT_ID {
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, *PCLIENT_ID;
+
+// Define OBJECT_ATTRIBUTES structure
+typedef struct _OBJECT_ATTRIBUTES {
+    ULONG Length;
+    HANDLE RootDirectory;
+    PUNICODE_STRING ObjectName;
+    ULONG Attributes;
+    PVOID SecurityDescriptor;
+    PVOID SecurityQualityOfService;
+} OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
+
+// Define NtOpenProcess function pointer type
+typedef NTSTATUS (NTAPI *PNtOpenProcess)(
+    PHANDLE ProcessHandle,
+    ACCESS_MASK DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes,
+    PCLIENT_ID ClientId
+);
+
+// Global function pointer for NtOpenProcess
+static PNtOpenProcess pNtOpenProcess = NULL;
+
 
 // Check if a privilege is already enabled
 BOOL IsPrivilegeEnabled(LPCWSTR privilegeName)
@@ -127,6 +176,23 @@ BOOL EnablePrivilege()
     return TRUE;
 }
 
+// Load NtOpenProcess function from ntdll.dll
+BOOL LoadNtOpenProcess() {
+    HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
+    if (hNtdll == NULL) {
+        printf("\t[!] Failed to get handle to ntdll.dll! Error: %lu\n", GetLastError());
+        return FALSE;
+    }
+    
+    pNtOpenProcess = (PNtOpenProcess)GetProcAddress(hNtdll, "NtOpenProcess");
+    if (pNtOpenProcess == NULL) {
+        printf("\t[!] Failed to get address of NtOpenProcess! Error: %lu\n", GetLastError());
+        return FALSE;
+    }
+    printf("\t[i] Successfully loaded NtOpenProcess from ntdll.dll\n");
+    return TRUE;
+}
+
 // Find Process Function
 DWORD FindProcess(DWORD pid) {
     HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -152,9 +218,41 @@ DWORD FindProcess(DWORD pid) {
 }
 
 
+// Function to open a handle to the target process
+NTSTATUS OpenProcessByPID(DWORD pid, PHANDLE hProcess) {
+    OBJECT_ATTRIBUTES parentProcessObjectAttributes;
+    CLIENT_ID parentProcessClientId;
+    NTSTATUS ntStatus;
+
+    // Initialize OBJECT_ATTRIBUTES manually
+    parentProcessObjectAttributes.Length = sizeof(OBJECT_ATTRIBUTES);
+    parentProcessObjectAttributes.RootDirectory = NULL;
+    parentProcessObjectAttributes.ObjectName = NULL;
+    parentProcessObjectAttributes.Attributes = 0;
+    parentProcessObjectAttributes.SecurityDescriptor = NULL;
+    parentProcessObjectAttributes.SecurityQualityOfService = NULL;
+
+    // Initialize CLIENT_ID
+    parentProcessClientId.UniqueProcess = (HANDLE)(ULONG_PTR)pid;
+    parentProcessClientId.UniqueThread = NULL;
+
+    // Open handle to target process
+    ntStatus = pNtOpenProcess(
+        hProcess,
+        PROCESS_CREATE_PROCESS,
+        &parentProcessObjectAttributes,
+        &parentProcessClientId
+    );
+    
+    return ntStatus;
+}
+
+
 int main(int argc, char *argv[]) {
     // Variable Initalization
     DWORD processToClonePid = 0;
+    HANDLE hParentProcess = NULL;
+    NTSTATUS NtStatus;
     char* endptr;
 
     // Check arguments
@@ -182,6 +280,13 @@ int main(int argc, char *argv[]) {
     printf("[+] Process with PID %u found!\n", processToClonePid);
     printf("\n");
 
+    // Load NtOpenProcess function
+    printf("[i] Loading NtOpenProcess function...\n");
+    if (!LoadNtOpenProcess()) {
+        printf("\t[!] Failed to load NtOpenProcess function!\n");
+        return 1;
+    }
+
     // Checking token privileges
     wprintf(L"[i] Checking token privileges...\n");
     if (!EnablePrivilege())
@@ -191,7 +296,13 @@ int main(int argc, char *argv[]) {
     }
     wprintf(L"[i] Privilege operation completed\n");
 
-    // GetFucked();
+
+    NtStatus = OpenProcessByPID(processToClonePid, &hParentProcess);
+    if (hParentProcess == NULL || NtStatus != STATUS_SUCCESS) {
+        printf("\t [!] Failed to open target process! NTSTATUS: 0x%08X\n", NtStatus);
+        return 1;
+    }
+    printf("[i] Target process opened; handle: 0x%p\n", hParentProcess);
 
     return 0;
 }
