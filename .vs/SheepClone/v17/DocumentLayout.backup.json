@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{3F41B2F0-8935-44BE-B4D6-3EAE132D625F}|SheepClone.vcxproj|C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\BOF-main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{3F41B2F0-8935-44BE-B4D6-3EAE132D625F}|SheepClone.vcxproj|solutionrelative:BOF-main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{3F41B2F0-8935-44BE-B4D6-3EAE132D625F}|SheepClone.vcxproj|C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{3F41B2F0-8935-44BE-B4D6-3EAE132D625F}|SheepClone.vcxproj|solutionrelative:main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
@@ -14,21 +18,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "BOF-main.c",
+              "DocumentMoniker": "C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\BOF-main.c",
+              "RelativeDocumentMoniker": "BOF-main.c",
+              "ToolTip": "C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\BOF-main.c",
+              "RelativeToolTip": "BOF-main.c",
+              "ViewState": "AgIAAPAAAAAAAAAAAAAAAAQBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-09-26T02:12:37.875Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "main.c",
               "DocumentMoniker": "C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\main.c",
               "RelativeDocumentMoniker": "main.c",
               "ToolTip": "C:\\Users\\aldap\\Pictures\\rust_tutorials\\SheepClone\\main.c",
               "RelativeToolTip": "main.c",
-              "ViewState": "AgIAAHcBAAAAAAAAAAAAAOABAABPAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOABAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
               "WhenOpened": "2025-09-18T03:46:31.996Z",
               "EditorCaption": ""
